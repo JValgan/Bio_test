@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Biologia - Selectivitat PAU 2025</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #0a2f3f 0%, #1b5a7a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px 20px;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            max-width: 1000px;
+            width: 100%;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: #0a2f44;
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.7rem;
+        }
+        .header p {
+            margin: 8px 0 0;
+            opacity: 0.85;
+            font-size: 0.9rem;
+        }
+        .config-panel {
+            background: #eef2fa;
+            padding: 18px 25px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            border-bottom: 1px solid #cddfe7;
+        }
+        .config-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 6px 18px;
+            border-radius: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .config-item label {
+            font-weight: 700;
+            color: #0a2f44;
+        }
+        .config-item input {
+            width: 75px;
+            padding: 8px;
+            font-size: 1rem;
+            text-align: center;
+            border: 1px solid #bdd4e2;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+        button {
+            background: #1f6392;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #0a3d5c;
+            transform: translateY(-2px);
+        }
+        .quiz-stats {
+            background: #f8fafc;
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            border-bottom: 1px solid #e2edf2;
+        }
+        .questions-area {
+            padding: 25px 30px;
+            max-height: 65vh;
+            overflow-y: auto;
+        }
+        .question-card {
+            background: #fefefe;
+            border-radius: 28px;
+            margin-bottom: 28px;
+            padding: 18px 22px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0ecf5;
+        }
+        .question-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0c4a6e;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            background: #f9fcff;
+            border: 1.5px solid #cbdde9;
+            border-radius: 60px;
+            padding: 10px 18px;
+            cursor: pointer;
+            transition: 0.1s;
+            font-weight: 500;
+        }
+        .option:hover {
+            background: #e6f2fa;
+            border-color: #2c7cb6;
+        }
+        .option.selected {
+            background: #1f6392;
+            color: white;
+            border-color: #0f3f5c;
+        }
+        .feedback {
+            margin-top: 12px;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .correct-feedback {
+            background: #dff9e6;
+            color: #0c5e2a;
+            border-left: 5px solid #2ecc71;
+        }
+        .wrong-feedback {
+            background: #ffeae9;
+            color: #b13a2d;
+            border-left: 5px solid #e67e22;
+        }
+        .submit-area {
+            padding: 20px 30px 30px;
+            text-align: center;
+            border-top: 1px solid #dce9f0;
+            background: #ffffff;
+        }
+        .final-score {
+            background: #0a2f44;
+            color: white;
+            padding: 12px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+        @media (max-width: 650px) {
+            .config-panel { flex-direction: column; align-items: stretch; }
+            .config-item { justify-content: space-between; }
+            .questions-area { padding: 20px; }
+        }
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 12px;
+            background: #eef2fa;
+            color: #3a6b8c;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="quizContainer">
+    <div class="header">
+        <h1>🧬 QUIZ BIOLOGIA | PAU 2025</h1>
+        <p>Biomolècules · Metabolisme · Genètica · Microorganismes · Immunologia · Biotecnologia · Evolució</p>
+    </div>
+    <div class="config-panel">
+        <div class="config-item">
+            <label>📋 Nombre de preguntes:</label>
+            <input type="number" id="numQuestions" min="1" max="100" value="15" step="1">
+        </div>
+        <button id="startBtn">▶ INICIAR QUIZ</button>
+        <button id="resetBtn" style="background:#5f7f9e;">⟳ Reiniciar</button>
+    </div>
+    <div id="quizMain" style="display: none;">
+        <div class="quiz-stats">
+            <span>🎯 Progrés: <span id="progress">0</span> / <span id="totalSelected">0</span></span>
+            <span>✅ Encertades: <span id="correctCount">0</span></span>
+        </div>
+        <div class="questions-area" id="questionsArea"></div>
+        <div class="submit-area">
+            <button id="submitQuiz" style="background: #2c7a4d;">✔️ CORREGIR EXAMEN</button>
+            <div id="scoreDisplay" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+    <footer>🔬 Preguntes basades en orientacions oficials de Biologia - Selectivitat 2025.<br>🔄 En cada partida, preguntes i respostes es barregen aleatòriament.</footer>
+</div>
+
+<script>
+    // ======================== BASE DE DADES: 100 PREGUNTES ========================
+    const preguntesBase = [];
+
+    // ---------- BIOMOLÈCULES (1-12) ----------
+    preguntesBase.push(
+        { text: "Quin tipus d'enllaç uneix els aminoàcids en una proteïna?", options: ["Enllaç peptídic", "Enllaç glucosídic", "Enllaç fosfodièster", "Enllaç éster"], correct: 0 },
+        { text: "Quina d'aquestes biomolècules té funció principalment energètica a curt termini?", options: ["Glúcids (monosacàrids)", "Lípids (triacilglicerols)", "Proteïnes", "Àcids nucleics"], correct: 0 },
+        { text: "L'estructura secundària d'una proteïna (α-hèlix) es manté gràcies a:", options: ["Ponts d'hidrogen", "Enllaços disulfur", "Interaccions hidrofòbiques", "Enllaços iònics"], correct: 0 },
+        { text: "Quin monosacàrid és una cetosa de cinc carbonis?", options: ["Ribulosa", "Glucosa", "Galactosa", "Desoxiribosa"], correct: 0 },
+        { text: "Els fosfolípids són amfipàtics perquè:", options: ["Tenen un cap polar i cues apolars", "Són completament hidrosolubles", "Són insolubles en aigua", "Només tenen grups fosfat"], correct: 0 },
+        { text: "Quina funció tenen els àcids nucleics?", options: ["Emmagatzemar i transmetre informació genètica", "Funció estructural exclusiva", "Reserva energètica a llarg termini", "Catalitzar reaccions metabòliques"], correct: 0 },
+        { text: "L'enllaç O-glucosídic en un disacàrid es forma entre:", options: ["Dos grups hidroxil", "Un grup amino i un carboxil", "Un fosfat i un sucre", "Un àcid gras i un glicerol"], correct: 0 },
+        { text: "Quina d'aquestes és una proteïna globular?", options: ["Hemoglobina", "Col·lagen", "Queratina", "Fibroïna"], correct: 0 },
+        { text: "El colesterol és un lípid de tipus:", options: ["Esterol", "Fosfolípid", "Triacilglicerol", "Ceràmida"], correct: 0 },
+        { text: "L'estructura quaternària d'una proteïna es refereix a:", options: ["Disposició de diverses subunitats polipeptídiques", "Plegament tridimensional d'una cadena", "Seqüència lineal d'aminoàcids", "Disposició de làmines β"], correct: 0 },
+        { text: "El glicogen és un polisacàrid d'emmagatzematge format per:", options: ["Glucosa amb enllaços α(1→4) i α(1→6)", "Galactosa", "Fructosa", "Ribosa"], correct: 0 },
+        { text: "Quines bases nitrogenades són púriques?", options: ["Adenina i guanina", "Citosina i timina", "Uracil i citosina", "Timina i adenina"], correct: 0 }
+    );
+
+    // ---------- METABOLISME (13-32) ----------
+    preguntesBase.push(
+        { text: "En la fotosíntesi oxigènica, la font d'electrons per reduir el NADP+ és:", options: ["Aigua (H2O)", "CO2", "Glucosa", "Oxigen"], correct: 0 },
+        { text: "On té lloc el cicle de Krebs en eucariotes?", options: ["Matriu mitocondrial", "Citosol", "Membrana tilacoïdal", "Estroma del cloroplast"], correct: 0 },
+        { text: "El balanç energètic net de la glucòlisi per molècula de glucosa és:", options: ["2 ATP i 2 NADH", "4 ATP i 2 NADH", "2 ATP i 2 FADH2", "38 ATP"], correct: 0 },
+        { text: "L'ATP sintasa mitocondrial s'alimenta de:", options: ["Gradient de protons", "Gradient de sodi", "NADH directament", "ATP del cicle de Krebs"], correct: 0 },
+        { text: "Durant la fase lluminosa de la fotosíntesi es produeix:", options: ["NADPH i ATP", "Glucosa", "CO2 fixat", "Oxigen a partir de CO2"], correct: 0 },
+        { text: "En la fermentació làctica (múscul), el piruvat es redueix per regenerar:", options: ["NAD+", "NADPH", "FADH2", "ATP"], correct: 0 },
+        { text: "L'enzim rubisco catalitza:", options: ["La fixació del CO2 al ribulosa-1,5-bifosfat", "La fotòlisi de l'aigua", "La síntesi d'ATP", "La reducció del NADP+"], correct: 0 },
+        { text: "Quina d'aquestes vies és anabòlica autòtrofa?", options: ["Fotosíntesi", "Glucòlisi", "Cicle de Krebs", "β-oxidació"], correct: 0 },
+        { text: "La cadena de transport d'electrons mitocondrial bomba protons des de:", options: ["Matriu a l'espai intermembrana", "Espai intermembrana a la matriu", "Citosol a la matriu", "Matriu al citosol"], correct: 0 },
+        { text: "El rendiment màxim d'ATP per glucosa en respiració aeròbica és aproximadament:", options: ["30-32 ATP", "2 ATP", "8 ATP", "38 ATP exactes"], correct: 0 },
+        { text: "La β-oxidació dels àcids grassos produeix:", options: ["Acetil-CoA, NADH i FADH2", "Piruvat", "Glucosa", "Cossos cetònics directament"], correct: 0 },
+        { text: "Quin dels següents processos té lloc al citosol?", options: ["Glucòlisi", "Cicle de Krebs", "Fosforilació oxidativa", "Cicle de Calvin"], correct: 0 },
+        { text: "El NADPH necessari per al cicle de Calvin es genera:", options: ["Fase lluminosa (fotosistema I)", "Fase fosca", "Cicle de Krebs", "Glucòlisi"], correct: 0 },
+        { text: "La quimiosíntesi és un procés propi de:", options: ["Bacteris quimiolitòtrofs", "Plantes", "Fongs", "Animals"], correct: 0 },
+        { text: "Durant la descarboxilació del piruvat es forma:", options: ["Acetil-CoA, CO2 i NADH", "Lactat i NAD+", "Etanol i CO2", "Oxalacetat"], correct: 0 },
+        { text: "En quin compartiment cel·lular es troba l'ADN dels cloroplasts?", options: ["Estroma", "Tilacoide", "Membrana externa", "Periplasma"], correct: 0 },
+        { text: "La funció del FADH2 en la respiració és:", options: ["Donar electrons a la cadena transportadora", "Fosforilar directament l'ATP", "Fixar CO2", "Transportar oxigen"], correct: 0 },
+        { text: "El balanç de la fermentació alcohòlica (per glucosa) és:", options: ["2 ATP + 2 CO2 + 2 etanol", "2 ATP + 2 lactat", "36 ATP + CO2", "2 ATP + 2 NADPH"], correct: 0 },
+        { text: "L'enzim al·lostèric clau en la glucòlisi és:", options: ["Fosfofructocinasa-1", "Hexocinasa", "Piruvat cinasa", "Isomerasa"], correct: 0 },
+        { text: "On es localitza la rubisco als cloroplasts?", options: ["Estroma", "Membrana tilacoïdal", "Espai intermembrana", "Peroxisoma"], correct: 0 }
+    );
+
+    // ---------- GENÈTICA (33-50) ----------
+    preguntesBase.push(
+        { text: "En els eucariotes, la replicació de l'ADN és:", options: ["Semiconservativa i bidireccional", "Conservativa", "Dispersiva", "Unidireccional"], correct: 0 },
+        { text: "Quin enzim sintetitza el nou filament d'ADN durant la replicació?", options: ["ADN polimerasa", "Helicasa", "Ligasa", "Primasa"], correct: 0 },
+        { text: "Un individu amb genotip Aa per a un caràcter autosòmic és:", options: ["Heterozigot", "Homozigot dominant", "Homozigot recessiu", "Hemizigot"], correct: 0 },
+        { text: "En una creuament entre dos heterozigots Aa, quina proporció genotípica s'obté?", options: ["1 AA : 2 Aa : 1 aa", "3 A_ : 1 aa", "1 Aa : 1 aa", "Tots Aa"], correct: 0 },
+        { text: "El codi genètic és degenerat perquè:", options: ["Més d'un codó codifica el mateix aminoàcid", "Un codó codifica diferents aminoàcids", "No té sentits de parada", "Només funciona en procariotes"], correct: 0 },
+        { text: "Quina diferència clau hi ha entre la transcripció de procariotes i eucariotes?", options: ["Eucariotes tenen processament de l'ARNm (splicing)", "Procariotes tenen introns", "Eucariotes no tenen factors de transcripció", "Procariotes fan la transcripció al nucli"], correct: 0 },
+        { text: "En herència lligada al sexe (cromosoma X), un home afectat per un al·lel recessiu:", options: ["Expressa sempre el tret perquè només té un X", "És sempre portador asimptomàtic", "Només ho expressa si la mare també era afectada", "No pot transmetre'l a les filles"], correct: 0 },
+        { text: "La llei de la segregació de Mendel estableix que:", options: ["Els al·lels se separen durant la formació dels gàmetes", "Els gens independents s'hereten junts", "Domina un al·lel sobre l'altre", "Els caràcters es barregen"], correct: 0 },
+        { text: "Quina és la funció de la meiosi?", options: ["Produir gàmetes haploides", "Creixement cel·lular", "Reparar l'ADN", "Divisió de cèl·lules somàtiques"], correct: 0 },
+        { text: "Els oncogens són:", options: ["Gens que promouen el càncer quan muten", "Gens supressors de tumors", "Gens que repara l'ADN", "RNA no codificant"], correct: 0 },
+        { text: "La regulació de l'operó lac en E. coli és un exemple de:", options: ["Control negatiu per repressor i control positiu per CRP-cAMP", "Només control positiu", "Control per atenuació", "Regulació epigenètica"], correct: 0 },
+        { text: "Quin tipus d'ARN porta l'aminoàcid al ribosoma?", options: ["ARNt", "ARNm", "ARNr", "ARNn"], correct: 0 },
+        { text: "En la mitosi, la separació de cromàtides germanes ocorre a:", options: ["Anafase", "Metafase", "Profase", "Telofase"], correct: 0 },
+        { text: "La recombinació genètica durant la meiosi es produeix a:", options: ["Profase I (crossing over)", "Anafase I", "Metafase II", "Telofase II"], correct: 0 },
+        { text: "Un individu dihíbrid (AaBb) produeix quants tipus de gàmetes diferents (gens independents)?", options: ["4", "2", "8", "1"], correct: 0 },
+        { text: "Les marques epigenètiques (com la metilació de l'ADN):", options: ["Regulen l'expressió sense canviar la seqüència", "Són mutacions permanents", "Només es transmeten a la descendència", "Activen sempre els gens"], correct: 0 },
+        { text: "Quina malaltia és un exemple d'herència autosòmica recessiva?", options: ["Fibrosi quística", "Malaltia de Huntington", "Daltonisme", "Hemofília"], correct: 0 },
+        { text: "Els enhancers (potenciadors) en eucariotes:", options: ["Són seqüències d'ADN que augmenten la transcripció des de lluny", "Són proteïnes repressores", "Són ARN no codificants", "Inhibeixen la unió de l'ARN polimerasa"], correct: 0 }
+    );
+
+    // ---------- MICROORGANISMES I VIRUS (51-65) ----------
+    preguntesBase.push(
+        { text: "Quina diferència fonamental hi ha entre bacteris i arqueobacteris?", options: ["Composició de la paret cel·lular i les membranes", "Presència de nucli", "Mida del ribosoma", "Capacitat de fermentar"], correct: 0 },
+        { text: "La tinció de Gram permet diferenciar bacteris segons:", options: ["Estructura de la paret cel·lular", "Forma", "Capacitat de moure's", "Metabolisme"], correct: 0 },
+        { text: "Els bacteris poden intercanviar material genètic per:", options: ["Conjugació, transformació i transducció", "Fecundació", "Esporulació", "Gem·lació"], correct: 0 },
+        { text: "Quin d'aquests és un mecanisme de transferència horitzontal que requereix un bacteriòfag?", options: ["Transducció", "Transformació", "Conjugació", "Transposició"], correct: 0 },
+        { text: "Els viroides són:", options: ["Molècules d'ARN circular infecciós sense càpsida", "Proteïnes infeccioses", "Virus amb ARN monocatenari", "Bacteris sense paret"], correct: 0 },
+        { text: "Els prions són agents infecciosos formats per:", options: ["Proteïnes mal plegades", "ARN", "ADN", "Polisacàrids"], correct: 0 },
+        { text: "En el cicle lisogènic d'un bacteriòfag:", options: ["L'ADN víric s'integra al cromosoma bacterià", "La cèl·lula es lisa immediatament", "Només es produeixen proteïnes tardanes", "No hi ha replicació vírica"], correct: 0 },
+        { text: "Els antibiòtics com la penicil·lina actuen:", options: ["Inhibint la síntesi de la paret bacteriana", "Destruint els ribosomes eucariotes", "Bloquejant la transcripció viral", "Inhibint l'ARN polimerasa"], correct: 0 },
+        { text: "La resistència als antibiòtics es pot estendre per:", options: ["Transferència gènica horitzontal", "Mutacions somàtiques", "Recombinació homòloga en humans", "Deriva genètica"], correct: 0 },
+        { text: "Quin microorganisme s'utilitza en la producció de iogurt?", options: ["Lactobacillus", "Saccharomyces", "Escherichia coli", "Bacillus thuringiensis"], correct: 0 },
+        { text: "La bioremediació aprofita microorganismes per:", options: ["Degradar contaminants", "Produir antibiòtics", "Sintetitzar vitamines", "Fer fermentació alcohòlica"], correct: 0 },
+        { text: "Els bacteris nitrificants (Nitrosomonas) participen en el cicle del:", options: ["Nitrogen", "Carboni", "Fòsfor", "Sofre"], correct: 0 },
+        { text: "La mida típica d'un bacteri és:", options: ["1-5 micròmetres", "0,1 micròmetres", "50-100 micròmetres", "Nanòmetres"], correct: 0 },
+        { text: "El virus de la immunodeficiència humana (VIH) conté:", options: ["ARN i retrotranscriptasa", "ADN bicatenari", "Només proteïnes", "ARN polimerasa dependent d'ARN"], correct: 0 },
+        { text: "La transducció és important en evolució bacteriana perquè:", options: ["Transfereix gens entre espècies diferents", "Només transfereix plasmidis", "Genera mutacions puntuals", "Crea esporres"], correct: 0 }
+    );
+
+    // ---------- IMMUNOLOGIA (66-80) ----------
+    preguntesBase.push(
+        { text: "On maduren els limfòcits T?", options: ["Tim", "Medul·la òssia", "Melsa", "Ganglis limfàtics"], correct: 0 },
+        { text: "Els anticossos (immunoglobulines) són produïts per:", options: ["Cèl·lules plasmàtiques", "Limfòcits T citotòxics", "Macròfags", "Cèl·lules NK"], correct: 0 },
+        { text: "Quina immunoglobulina és la principal en la resposta primària i és pentàmera?", options: ["IgM", "IgG", "IgA", "IgE"], correct: 0 },
+        { text: "Les cèl·lules presentadores d'antigen professionals inclouen:", options: ["Cèl·lules dendrítiques, macròfags i limfòcits B", "Neutròfils", "Eosinòfils", "Mastòcits"], correct: 0 },
+        { text: "La funció dels limfòcits T CD8+ és:", options: ["Destruir cèl·lules infectades (citolítica)", "Activar limfòcits B", "Produir anticossos", "Suprimir la resposta immune"], correct: 0 },
+        { text: "La immunitat passiva artificial s'aconsegueix mitjançant:", options: ["Injecció d'anticossos (sèrum)", "Vacuna", "Infecció natural", "Transfusió de limfòcits"], correct: 0 },
+        { text: "Les vacunes generen:", options: ["Memòria immunològica sense causar la malaltia", "Immunitat passiva", "Anticossos materns", "Immunitat innata"], correct: 0 },
+        { text: "L'opsonització consisteix a:", options: ["Marcar patògens per facilitar la fagocitosi", "Lisar directament la cèl·lula", "Activar els limfòcits B", "Induir febre"], correct: 0 },
+        { text: "El sistema del complement pot activar-se per la via:", options: ["Clàssica (anticossos), alternativa i de les lectines", "Només per la via clàssica", "Només per la via alternativa", "Mitjançant limfòcits T"], correct: 0 },
+        { text: "Quina cèl·lula s'encarrega de la resposta citolítica no específica contra tumors?", options: ["Limfòcit NK", "Limfòcit T CD8", "Macròfag", "Neutròfil"], correct: 0 },
+        { text: "La resposta immunitària secundària és més ràpida perquè:", options: ["Hi ha limfòcits de memòria", "Els anticossos són més potents", "S'activa el complement directament", "No cal presentació antigènica"], correct: 0 },
+        { text: "Les malalties autoimmunes es deuen a:", options: ["Pèrdua de tolerància a components propis", "Deficiència de limfòcits B", "Excés d'immunoglobulines IgE", "Infecció per VIH"], correct: 0 },
+        { text: "La immunitat de grup (ramat) s'aconsegueix quan:", options: ["Un percentatge alt de la població està vacunada", "Tots els individus prenen antibiòtics", "Només els més joves es vacunen", "Es fan proves diagnòstiques massives"], correct: 0 },
+        { text: "La hipersensibilitat immediata (al·lèrgia) està mediada per:", options: ["IgE i mastòcits", "IgG i complement", "Limfòcits T", "Macròfags"], correct: 0 },
+        { text: "El rebuig de trasplantaments és causat per:", options: ["Reconeixement de MHC diferents", "Infeccions oportunistes", "Deficiència de limfòcits B", "Producció excessiva d'IgA"], correct: 0 }
+    );
+
+    // ---------- BIOTECNOLOGIA (81-90) ----------
+    preguntesBase.push(
+        { text: "Quin enzim talla l'ADN en seqüències específiques de palindrom?", options: ["Endonucleasa de restricció", "Ligasa", "ADN polimerasa", "Transcriptasa inversa"], correct: 0 },
+        { text: "La tècnica PCR (reacció en cadena de la polimerasa) permet:", options: ["Amplificar un fragment d'ADN específic", "Separar proteïnes", "Clonar un organisme sencer", "Sequenciar proteïnes"], correct: 0 },
+        { text: "Quina és la funció de CRISPR-Cas9 en edició genètica?", options: ["Tallar ADN en una seqüència guiada per ARN", "Unir fragments d'ADN", "Sintetitzar ADN a partir d'ARN", "Metilar l'ADN"], correct: 0 },
+        { text: "Un organisme transgènic és aquell que:", options: ["Conté gens d'una altra espècie", "No té gens", "Té els seus gens mutats", "És un clon"], correct: 0 },
+        { text: "La teràpia gènica consisteix a:", options: ["Introduir gens funcionals per tractar malalties", "Extirpar òrgans malalts", "Administrar anticossos", "Utilitzar antibiòtics"], correct: 0 },
+        { text: "Quin vector s'utilitza sovint per introduir gens a plantes?", options: ["Agrobacterium tumefaciens", "Bacteriòfag lambda", "Plasmidi de llevat", "Virus de la grip"], correct: 0 },
+        { text: "L'ADN recombinant es forma mitjançant:", options: ["Lligació de fragments tallats amb el mateix enzim de restricció", "PCR aleatòria", "Transcripció inversa", "Electroforesi"], correct: 0 },
+        { text: "La insulina humana es produeix industrialment en bacteris gràcies a:", options: ["ADN recombinant", "Fermentació tradicional", "Cultiu de cèl·lules pancreàtiques", "Quimiosíntesi"], correct: 0 },
+        { text: "Quina tècnica separa fragments d'ADN per mida?", options: ["Electroforesi en gel", "PCR", "Clonació", "Seqüenciació Sanger"], correct: 0 },
+        { text: "Els enzims de restricció són produïts naturalment per:", options: ["Bacteris (com a defensa contra virus)", "Plantes", "Fongs", "Animals"], correct: 0 }
+    );
+
+    // ---------- EVOLUCIÓ (91-100) ----------
+    preguntesBase.push(
+        { text: "Quin concepte és incorrecte del lamarckisme?", options: ["Herència dels caràcters adquirits", "Ús i desús d'òrgans", "Adaptació a l'entorn", "Selecció natural"], correct: 3 },
+        { text: "Les estructures homòlogues (com l'ala d'ocell i el braç humà) indiquen:", options: ["Origen comú evolutiu", "Funció idèntica", "Convergència evolutiva", "Analogia funcional"], correct: 0 },
+        { text: "En l'equilibri de Hardy-Weinberg, les freqüències al·lèliques es mantenen si:", options: ["No hi ha mutació, selecció, deriva ni flux gènic", "Hi ha selecció natural intensa", "La població és petita", "Només es reprodueixen els més aptes"], correct: 0 },
+        { text: "L'especiació al·lopàtrica requereix:", options: ["Aïllament geogràfic", "Aïllament reproductiu simpàtric", "Poliploïdia", "Selecció sexual"], correct: 0 },
+        { text: "La deriva genètica és més intensa en:", options: ["Poblacions petites", "Poblacions grans", "Ecosistemes estables", "Espècies amb alta fecunditat"], correct: 0 },
+        { text: "Els fòssils de transició (com Archaeopteryx) evidencien:", options: ["Canvis evolutius entre grups", "Creacionisme", "Espècies invariables", "Equilibri puntuat exclusivament"], correct: 0 },
+        { text: "La radiació adaptativa és un procés on:", options: ["Una espècie ancestral origina moltes espècies diferents", "Dues espècies converteixen en una", "Hi ha extinció massiva", "No hi canvis morfològics"], correct: 0 },
+        { text: "Segons la teoria sintètica de l'evolució, la matèria primera de l'evolució són:", options: ["Mutacions i recombinació", "La selecció natural", "La deriva genètica", "El flux gènic"], correct: 0 },
+        { text: "L'endosimbiosi explica l'origen de:", options: ["Mitocondris i cloroplasts", "El nucli cel·lular", "Els ribosomes", "La paret cel·lular"], correct: 0 },
+        { text: "Els gens ortòlegs són aquells que:", options: ["Deriven d'un gen ancestral comú en diferents espècies", "Es dupliquen dins del mateix genoma", "No tenen homologia", "Són exclusius d'una espècie"], correct: 0 }
+    );
+
+    // ======================== FUNCIONS D'ALEATORITZACIÓ ========================
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    
+    function shuffleQuestionOptions(pregunta) {
+        const originalOptions = [...pregunta.options];
+        const originalCorrect = pregunta.correct;
+        const correctText = originalOptions[originalCorrect];
+        
+        const indexed = originalOptions.map((opt, idx) => ({ opt, idx }));
+        const shuffledIndexed = shuffleArray([...indexed]);
+        
+        const newOptions = shuffledIndexed.map(item => item.opt);
+        const newCorrect = newOptions.findIndex(opt => opt === correctText);
+        
+        return {
+            text: pregunta.text,
+            options: newOptions,
+            correct: newCorrect
+        };
+    }
+    
+    // ======================== GESTIÓ DEL QUIZ ========================
+    let currentQuestions = [];
+    let userAnswers = [];
+    let quizActive = false;
+    let totalSelected = 0;
+    
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const numInput = document.getElementById('numQuestions');
+    const quizMain = document.getElementById('quizMain');
+    const questionsArea = document.getElementById('questionsArea');
+    const progressSpan = document.getElementById('progress');
+    const totalSelectedSpan = document.getElementById('totalSelected');
+    const correctCountSpan = document.getElementById('correctCount');
+    const submitBtn = document.getElementById('submitQuiz');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    
+    function startQuiz() {
+        let num = parseInt(numInput.value);
+        if (isNaN(num)) num = 15;
+        num = Math.min(Math.max(num, 1), 100);
+        totalSelected = num;
+        
+        const shuffledBase = shuffleArray([...preguntesBase]);
+        const selectedBase = shuffledBase.slice(0, num);
+        
+        currentQuestions = selectedBase.map(q => shuffleQuestionOptions(q));
+        userAnswers = new Array(num).fill(null);
+        
+        renderQuestions();
+        quizActive = true;
+        quizMain.style.display = 'block';
+        totalSelectedSpan.innerText = totalSelected;
+        correctCountSpan.innerText = '0';
+        progressSpan.innerText = '0';
+        scoreDisplay.innerHTML = '';
+    }
+    
+    function renderQuestions() {
+        if (!currentQuestions.length) return;
+        let html = '';
+        currentQuestions.forEach((q, idx) => {
+            const selectedOpt = userAnswers[idx];
+            html += `
+                <div class="question-card" data-qidx="${idx}">
+                    <div class="question-text">${idx+1}. ${q.text}</div>
+                    <div class="options" id="options-${idx}">
+                        ${q.options.map((opt, optIdx) => `
+                            <div class="option ${selectedOpt === optIdx ? 'selected' : ''}" data-optidx="${optIdx}">
+                                ${String.fromCharCode(65+optIdx)}. ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="feedback" id="fb-${idx}"></div>
+                </div>
+            `;
+        });
+        questionsArea.innerHTML = html;
+        
+        for (let i = 0; i < currentQuestions.length; i++) {
+            const optionsDiv = document.getElementById(`options-${i}`);
+            if (optionsDiv) {
+                const opts = optionsDiv.querySelectorAll('.option');
+                opts.forEach(opt => {
+                    opt.addEventListener('click', (e) => {
+                        if (!quizActive) return;
+                        const optIdx = parseInt(opt.dataset.optidx);
+                        userAnswers[i] = optIdx;
+                        opts.forEach(o => o.classList.remove('selected'));
+                        opt.classList.add('selected');
+                        const fb = document.getElementById(`fb-${i}`);
+                        if (fb) fb.innerHTML = '';
+                        updateProgress();
+                    });
+                });
+            }
+        }
+        updateProgress();
+    }
+    
+    function updateProgress() {
+        const answered = userAnswers.filter(a => a !== null).length;
+        progressSpan.innerText = answered;
+    }
+    
+    function computeScore() {
+        let correct = 0;
+        for (let i = 0; i < currentQuestions.length; i++) {
+            const userAns = userAnswers[i];
+            const correctAns = currentQuestions[i].correct;
+            const isCorrect = (userAns === correctAns);
+            if (isCorrect) correct++;
+            
+            const fbDiv = document.getElementById(`fb-${i}`);
+            if (fbDiv) {
+                const letterCorrect = String.fromCharCode(65 + correctAns);
+                const textCorrect = currentQuestions[i].options[correctAns];
+                if (userAns === null) {
+                    fbDiv.innerHTML = `<div class="feedback wrong-feedback">❌ Sense respondre. Resposta correcta: ${letterCorrect}. ${textCorrect}</div>`;
+                } else if (isCorrect) {
+                    fbDiv.innerHTML = '<div class="feedback correct-feedback">✅ Correcte!</div>';
+                } else {
+                    fbDiv.innerHTML = `<div class="feedback wrong-feedback">❌ Incorrecte. Resposta correcta: ${letterCorrect}. ${textCorrect}</div>`;
+                }
+            }
+        }
+        correctCountSpan.innerText = correct;
+        const percent = (correct / totalSelected * 100).toFixed(1);
+        scoreDisplay.innerHTML = `<div class="final-score">🎓 Qualificació: ${correct}/${totalSelected} (${percent}%)</div>`;
+        return correct;
+    }
+    
+    function resetQuiz() {
+        quizActive = false;
+        quizMain.style.display = 'none';
+        questionsArea.innerHTML = '';
+        scoreDisplay.innerHTML = '';
+        userAnswers = [];
+        currentQuestions = [];
+        totalSelected = 0;
+        progressSpan.innerText = '0';
+        totalSelectedSpan.innerText = '0';
+        correctCountSpan.innerText = '0';
+        numInput.value = '15';
+    }
+    
+    startBtn.addEventListener('click', () => {
+        resetQuiz();
+        startQuiz();
+    });
+    resetBtn.addEventListener('click', () => {
+        resetQuiz();
+    });
+    submitBtn.addEventListener('click', () => {
+        if (!quizActive || currentQuestions.length === 0) return;
+        computeScore();
+        quizActive = false;
+    });
+</script>
+</body>
+</html>
